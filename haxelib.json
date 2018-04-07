@@ -9,6 +9,6 @@
 	"contributors": ["_ibilon"],
 	"dependencies": {
 		"hxnodejs": "",
-		"compiletime": ""
+		"compiletime": "2.7.0"
 	}
 }

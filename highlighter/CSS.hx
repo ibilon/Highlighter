@@ -8,7 +8,7 @@ class CSS
 	{
 		var style = [];
 
-		style.push('.highlighted { font-family: "Droid Sans Mono", "monospace", monospace, "Droid Sans Fallback"; font-size: 14; }');
+		style.push('.highlighted { font-family: "Droid Sans Mono", "monospace", monospace, "Droid Sans Fallback"; font-size: 14px; }');
 		style.push(generateTokensCSSForColorMap(registry.getColorMap()));
 
 		return style.join("\n");

@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"tags": ["syntax", "highlightning", "tmLanguage"],
 	"description": "Tool used to highlight text according to a textmate tmLanguage file",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"releasenote": "Initial release",
 	"contributors": ["_ibilon"],
 	"dependencies": {

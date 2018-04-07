@@ -8,6 +8,7 @@
 	"releasenote": "Initial release",
 	"contributors": ["_ibilon"],
 	"dependencies": {
-		"hxnodejs": ""
+		"hxnodejs": "",
+		"compiletime": ""
 	}
 }

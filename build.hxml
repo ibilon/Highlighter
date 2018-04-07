@@ -1,3 +1,4 @@
--main highlighter.Main
+-main highlighter.Highlighter
+-lib compiletime
 -lib hxnodejs
 -js bin/highlighter.js

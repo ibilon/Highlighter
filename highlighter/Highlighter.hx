@@ -8,7 +8,7 @@ import highlighter.VscodeTextmate;
 import sys.FileSystem;
 import sys.io.File;
 
-class Main
+class Highlighter
 {
 	static function println (output:Output, message:String)
 	{
@@ -18,7 +18,7 @@ class Main
 
 	static function usage (output:Output)
 	{
-		println(output, "node bin/highlighter.js --grammar=/path/to/file --theme=/path/to/file --output=style|content [--input=stdin|file] [--file=/path/to/file]");
+		println(output, "node bin/highlighter.js --grammar=/path/to/file --theme=light|dark|/path/to/file --output=style|content [--input=stdin|file] [--file=/path/to/file]");
 	}
 
 	public static function main ()
@@ -105,7 +105,17 @@ class Main
 			exit(1);
 		}
 
-		if (!FileSystem.exists(theme))
+		if (theme == "light")
+		{
+			theme = "light_plus.json";
+		}
+
+		if (theme == "dark")
+		{
+			theme = "dark_plus.json";
+		}
+
+		if (theme != "light_plus.json" && theme != "dark_plus.json" && !FileSystem.exists(theme))
 		{
 			println(cerr, 'Theme file "${theme}" doesn\'t exist');
 			exit(1);
@@ -129,7 +139,7 @@ class Main
 			exit(1);
 		}
 
-		var h = new Main(grammar, theme);
+		var h = new Highlighter(grammar, theme);
 		cout.writeString(h.run(output, input, file));
 	}
 

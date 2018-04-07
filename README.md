@@ -37,7 +37,7 @@ You need to target nodejs, add `-lib highlighter` to your command.
 
 First create a highlighter:
 ```haxe
-var h = new highliter.Highlighter("grammar/someGrammar.tmLanguage", "light");
+var h = new highlighter.Highlighter("grammar/someGrammar.tmLanguage", "light");
 ```
 
 Then you can use it to highlight:

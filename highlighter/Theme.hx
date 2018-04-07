@@ -52,7 +52,7 @@ class Theme
 			case "light_defaults.json":
 				CompileTime.readFile("highlighter/themes/light_defaults.json");
 
-			case "light_plus.json":
+			case "light", "light_plus.json":
 				CompileTime.readFile("highlighter/themes/light_plus.json");
 
 			case "light_vs.json":
@@ -61,7 +61,7 @@ class Theme
 			case "dark_defaults.json":
 				CompileTime.readFile("highlighter/themes/dark_defaults.json");
 
-			case "dark_plus.json":
+			case "dark", "dark_plus.json":
 				CompileTime.readFile("highlighter/themes/dark_plus.json");
 
 			case "dark_vs.json":

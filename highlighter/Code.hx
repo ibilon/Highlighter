@@ -50,7 +50,7 @@ class Code
 			result.push("\n");
 		}
 
-		result.push("</pre>\n");
+		result.push("</pre>");
 		return result.join("");
 	}
 }

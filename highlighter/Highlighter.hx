@@ -1,12 +1,22 @@
 package highlighter;
 
 import Sys.exit;
+import haxe.io.Bytes;
+import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
 import haxe.io.Input;
 import haxe.io.Output;
 import highlighter.VscodeTextmate;
 import sys.FileSystem;
 import sys.io.File;
+
+enum RunData
+{
+	Style;
+	StdinContent;
+	FileContent(path:String);
+	DataContent(content:String);
+}
 
 class Highlighter
 {
@@ -139,8 +149,21 @@ class Highlighter
 			exit(1);
 		}
 
+		// Run it
 		var h = new Highlighter(grammar, theme);
-		cout.writeString(h.run(output, input, file));
+
+		if (output == "style")
+		{
+			cout.writeString(h.run(Style));
+		}
+		else if (input == "stdin")
+		{
+			cout.writeString(h.run(StdinContent));
+		}
+		else
+		{
+			cout.writeString(h.run(FileContent(file)));
+		}
 	}
 
 	var registry : Registry;
@@ -165,41 +188,32 @@ class Highlighter
 	/**
 	Run the highlighter.
 
-	@param output Either "style" or "content".
-	@param input If `output` is "content": either "stdin", "file" or "data".
-	@param file If `input` is "file": the path to the file to be highlighted, if `input` is "data": the data.
+	@param data The data to run the highlighter on.
 	**/
-	public function run (output:String, ?input:String, ?file:String) : String
+	public function run (data:RunData) : String
 	{
 		var cout = new BytesOutput();
+		var input : Input = null;
 
-		// Run
-		
-
-		if (output == "style")
+		switch (data)
 		{
-			println(cout, CSS.generateStyle(registry));
+			case Style:
+				println(cout, CSS.generateStyle(registry));
+
+			case FileContent(path):
+				input = File.read(path, false);
+
+			case DataContent(content):
+				input = new BytesInput(Bytes.ofString(content));
+
+			case StdinContent:
+				input = new BytesInput(Bytes.ofString(NodeUtils.readAllStdin()));
 		}
-		else
+
+		if (data != Style)
 		{
-			var data : Input;
-
-			if (input == "file")
-			{
-				data = File.read(file, false);
-			}
-			else if (input == "data")
-			{
-				data = new haxe.io.BytesInput(haxe.io.Bytes.ofString(file));
-			}
-			else
-			{
-				data = Sys.stdin();
-			}
-
-			println(cout, Code.generateHighlighted(grammar, data));
-
-			data.close();
+			println(cout, Code.generateHighlighted(grammar, input));
+			input.close();
 		}
 
 		return cout.getBytes().toString();

@@ -29,7 +29,7 @@ To output the css styling:
 To output the highlighted content:
 `node bin/highlighter.js --grammar=/path/to/file --theme=light|dark|/path/to/file --output=content --input=file --file=/path/to/file`
 
-**Warning**: Currently the stdin input doesn't work (it hangs).
+The built-in themes are from [VSCode](https://github.com/Microsoft/vscode).
 
 ## License
 

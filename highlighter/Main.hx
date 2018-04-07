@@ -129,28 +129,42 @@ class Main
 			exit(1);
 		}
 
-		cout.writeString(run(grammar, theme, output, input, file));
+		var h = new Main(grammar, theme);
+		cout.writeString(h.run(output, input, file));
+	}
+
+	var registry : Registry;
+	var grammar : IGrammar;
+	var theme : Theme.ThemeData;
+
+	/**
+	Create a highlighter.
+
+	@param grammar The path to the grammar file.
+	@param theme The path to the theme.
+	**/
+	public function new (grammar:String, theme:String)
+	{
+		this.registry = new Registry();
+		this.grammar = registry.loadGrammarFromPathSync(grammar);
+
+		this.theme = Theme.load(theme);
+		this.registry.setTheme({ name: this.theme.name, settings: this.theme.tokenColors });
 	}
 
 	/**
 	Run the highlighter.
 
-	@param grammar The path to the grammar file.
-	@param theme The path to the theme.
 	@param output Either "style" or "content".
-	@param input If `output` is "content", either "stdin" or "file".
-	@param file If `input` is "file", the path to the file to be highlighted.
+	@param input If `output` is "content": either "stdin", "file" or "data".
+	@param file If `input` is "file": the path to the file to be highlighted, if `input` is "data": the data.
 	**/
-	public static function run (grammar:String, theme:String, output:String, ?input:String, ?file:String) : String
+	public function run (output:String, ?input:String, ?file:String) : String
 	{
 		var cout = new BytesOutput();
 
 		// Run
-		var registry = new Registry();
-		var grammar = registry.loadGrammarFromPathSync(grammar);
-
-		var theme = Theme.load(theme);
-		registry.setTheme({ name: theme.name, settings: theme.tokenColors });
+		
 
 		if (output == "style")
 		{
@@ -163,6 +177,10 @@ class Main
 			if (input == "file")
 			{
 				data = File.read(file, false);
+			}
+			else if (input == "data")
+			{
+				data = new haxe.io.BytesInput(haxe.io.Bytes.ofString(file));
 			}
 			else
 			{

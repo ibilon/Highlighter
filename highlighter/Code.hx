@@ -11,7 +11,7 @@ class Code
 	public static function generateHighlighted (grammar:IGrammar, input:Input) : String
 	{
 		var result = [];
-		result.push('<div class="highlighted">\n');
+		result.push('<pre class="highlighted">\n');
 
 		var ruleStack = null;
 		var line;
@@ -29,14 +29,11 @@ class Code
 
 			if (line == "")
 			{
-				result.push("<br />\n");
+				result.push("\n");
 				continue;
 			}
 
 			var r = grammar.tokenizeLine2(line, ruleStack);
-
-			result.push("<div>\n\t");
-
 			var tokens = Token.process(r.tokens, line.length);
 
 			for (token in tokens)
@@ -45,16 +42,15 @@ class Code
 
 				text = text.htmlEscape(true);
 				text = text.replace("\t", "    ");
-				text = text.replace(" ", "&nbsp;");
 
 				result.push('<span class="${CSS.getClass(token)}">${text}</span>');
 			}
 
 			ruleStack = r.ruleStack;
-			result.push("\n</div>\n");
+			result.push("\n");
 		}
 
-		result.push("</div>\n");
+		result.push("</pre>\n");
 		return result.join("");
 	}
 }

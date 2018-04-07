@@ -1,7 +1,10 @@
+package highlighter;
+
 import Sys.exit;
-import VscodeTextmate;
+import haxe.io.BytesOutput;
 import haxe.io.Input;
 import haxe.io.Output;
+import highlighter.VscodeTextmate;
 import sys.FileSystem;
 import sys.io.File;
 
@@ -126,6 +129,22 @@ class Main
 			exit(1);
 		}
 
+		cout.writeString(run(grammar, theme, output, input, file));
+	}
+
+	/**
+	Run the highlighter.
+
+	@param grammar The path to the grammar file.
+	@param theme The path to the theme.
+	@param output Either "style" or "content".
+	@param input If `output` is "content", either "stdin" or "file".
+	@param file If `input` is "file", the path to the file to be highlighted.
+	**/
+	public static function run (grammar:String, theme:String, output:String, ?input:String, ?file:String) : String
+	{
+		var cout = new BytesOutput();
+
 		// Run
 		var registry = new Registry();
 		var grammar = registry.loadGrammarFromPathSync(grammar);
@@ -154,5 +173,7 @@ class Main
 
 			data.close();
 		}
+
+		return cout.getBytes().toString();
 	}
 }

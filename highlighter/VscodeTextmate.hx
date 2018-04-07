@@ -1,3 +1,5 @@
+package highlighter;
+
 import js.html.Uint32Array;
 
 @:jsRequire("vscode-textmate", "Registry")

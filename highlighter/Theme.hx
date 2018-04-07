@@ -1,5 +1,7 @@
-import VscodeTextmate;
+package highlighter;
+
 import haxe.Json;
+import highlighter.VscodeTextmate;
 import sys.io.File;
 
 using haxe.io.Path;

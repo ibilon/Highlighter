@@ -1,4 +1,3 @@
--cp src
--main Main
+-main highlighter.Main
 -lib hxnodejs
 -js bin/highlighter.js

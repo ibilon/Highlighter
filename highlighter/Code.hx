@@ -1,6 +1,8 @@
-import VscodeTextmate;
+package highlighter;
+
 import haxe.io.Eof;
 import haxe.io.Input;
+import highlighter.VscodeTextmate;
 
 using StringTools;
 

@@ -1,4 +1,6 @@
-import VscodeTextmate;
+package highlighter;
+
+import highlighter.VscodeTextmate;
 import js.html.Uint32Array;
 
 typedef TokenData = {

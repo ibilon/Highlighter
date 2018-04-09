@@ -2,10 +2,10 @@
 	"name": "highlighter",
 	"url" : "https://github.com/ibilon/Highlighter",
 	"license": "MIT",
-	"tags": ["syntax", "highlightning", "tmLanguage"],
+	"tags": ["syntax", "highlighting", "tmLanguage"],
 	"description": "Tool used to highlight text according to a textmate tmLanguage file",
-	"version": "0.3.0",
-	"releasenote": "Safer API and built-in theme",
+	"version": "0.4.0",
+	"releasenote": "CLI and API improvements",
 	"contributors": ["_ibilon"],
 	"dependencies": {
 		"hxnodejs": "",

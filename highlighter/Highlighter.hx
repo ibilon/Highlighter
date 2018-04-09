@@ -10,14 +10,6 @@ import highlighter.VscodeTextmate;
 import sys.FileSystem;
 import sys.io.File;
 
-enum RunData
-{
-	Style;
-	StdinContent;
-	FileContent(path:String);
-	DataContent(content:String);
-}
-
 class Highlighter
 {
 	static function println (output:Output, message:String)
@@ -28,7 +20,8 @@ class Highlighter
 
 	static function usage (output:Output)
 	{
-		println(output, "node bin/highlighter.js --grammar=/path/to/file --theme=light|dark|/path/to/file --output=style|content [--input=stdin|file] [--file=/path/to/file]");
+		println(output, "node bin/highlighter.js css [--theme=light|dark|/path/to/file]");
+		println(output, "node bin/highlighter.js highlight --grammar=/path/to/file --input=stdin|file [--file=/path/to/file] [--theme=light|dark|/path/to/file]");
 	}
 
 	public static function main ()
@@ -43,16 +36,24 @@ class Highlighter
 			usage(cout);
 			exit(0);
 		}
-		else if (args.length < 3)
+		else if (args.length < 1)
 		{
-			println(cerr, "Some argument(s) are missing");
+			println(cerr, "Missing command");
+			usage(cerr);
+			exit(1);
+		}
+
+		var command = args.shift();
+
+		if (command != "css" && command != "highlight")
+		{
+			println(cerr, 'Unknown command "${command}"');
 			usage(cerr);
 			exit(1);
 		}
 
 		var grammar = "";
-		var theme = "";
-		var output = "";
+		var theme = "light";
 		var input = "";
 		var file = "";
 
@@ -77,17 +78,6 @@ class Highlighter
 				case "theme":
 					theme = value;
 
-				case "output":
-					if (value == "style" || value == "content")
-					{
-						output = value;
-					}
-					else
-					{
-						println(cerr, 'Unknown value for output "${value}", should be either style or content');
-						exit(1);
-					}
-
 				case "input":
 					if (value == "stdin" || value == "file")
 					{
@@ -109,7 +99,19 @@ class Highlighter
 		}
 
 		// Validate args
-		if (!FileSystem.exists(grammar))
+		if (command == "highlight" && input == "")
+		{
+			println(cerr, "You need to specify an input mode when highlighting");
+			exit(1);
+		}
+
+		if (command == "highlight" && grammar == "")
+		{
+			println(cerr, "You need to specify a grammar when highlighting");
+			exit(1);
+		}
+
+		if (command == "highlight" && !FileSystem.exists(grammar))
 		{
 			println(cerr, 'Grammar file "${grammar}" doesn\'t exist');
 			exit(1);
@@ -131,12 +133,6 @@ class Highlighter
 			exit(1);
 		}
 
-		if (output == "content" && input == "")
-		{
-			println(cerr, "You need to specify an input mode when outputing content");
-			exit(1);
-		}
-
 		if (input == "file" && file == "")
 		{
 			println(cerr, "You need to specify a file");
@@ -152,17 +148,17 @@ class Highlighter
 		// Run it
 		var h = new Highlighter(grammar, theme);
 
-		if (output == "style")
+		if (command == "css")
 		{
-			cout.writeString(h.run(Style));
+			cout.writeString(h.runCss());
 		}
 		else if (input == "stdin")
 		{
-			cout.writeString(h.run(StdinContent));
+			cout.writeString(h.runStdin());
 		}
 		else
 		{
-			cout.writeString(h.run(FileContent(file)));
+			cout.writeString(h.runFile(file));
 		}
 	}
 
@@ -176,46 +172,66 @@ class Highlighter
 	@param grammar The path to the grammar file.
 	@param theme The path to the theme.
 	**/
-	public function new (grammar:String, theme:String)
+	public function new (grammar:String, theme:String = "light")
 	{
 		this.registry = new Registry();
-		this.grammar = registry.loadGrammarFromPathSync(grammar);
+
+		if (grammar != "")
+		{
+			this.grammar = registry.loadGrammarFromPathSync(grammar);
+		}
 
 		this.theme = Theme.load(theme);
 		this.registry.setTheme({ name: this.theme.name, settings: this.theme.tokenColors });
 	}
 
 	/**
-	Run the highlighter.
-
-	@param data The data to run the highlighter on.
+	Get the CSS for the theme.
 	**/
-	public function run (data:RunData) : String
+	public function runCss () : String
 	{
 		var cout = new BytesOutput();
-		var input : Input = null;
-
-		switch (data)
-		{
-			case Style:
-				println(cout, CSS.generateStyle(registry));
-
-			case FileContent(path):
-				input = File.read(path, false);
-
-			case DataContent(content):
-				input = new BytesInput(Bytes.ofString(content));
-
-			case StdinContent:
-				input = new BytesInput(Bytes.ofString(NodeUtils.readAllStdin()));
-		}
-
-		if (data != Style)
-		{
-			println(cout, Code.generateHighlighted(grammar, input));
-			input.close();
-		}
-
+		println(cout, CSS.generateStyle(registry));
 		return cout.getBytes().toString();
+	}
+
+	function run (input:Input) : String
+	{
+		var cout = new BytesOutput();
+
+		println(cout, Code.generateHighlighted(grammar, input));
+		input.close();
+		return cout.getBytes().toString();
+	}
+
+	/**
+	Run the highlighter on the stdin.
+	**/
+	public function runStdin () : String
+	{
+		var input = new BytesInput(Bytes.ofString(NodeUtils.readAllStdin()));
+		return Code.generateHighlighted(grammar, input);
+	}
+
+	/**
+	Run the highlighter on some content.
+
+	@param content The content to highlight.
+	**/
+	public function runContent (content:String) : String
+	{
+		var input = new BytesInput(Bytes.ofString(content));
+		return Code.generateHighlighted(grammar, input);
+	}
+
+	/**
+	Run the highlighter on some file.
+
+	@param content The content to highlight.
+	**/
+	public function runFile (path:String) : String
+	{
+		var input = File.read(path, false);
+		return Code.generateHighlighted(grammar, input);
 	}
 }

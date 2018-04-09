@@ -21,15 +21,26 @@ haxe build.hxml
 
 ## Usage as a tool
 
+### Get CSS
+
+This will output the css styling necessary to display the highlighted content.
+
 ```
-node bin/highlighter.js --grammar=/path/to/file --theme=light|dark|/path/to/file --output=style|content [--input=stdin|file] [--file=/path/to/file]
+node bin/highlighter.js css [--theme=light|dark|/path/to/file]
 ```
 
-To output the css styling:
-`node bin/highlighter.js --grammar=/path/to/file --theme=light|dark|/path/to/file --output=style`
+By default the light theme is used.
 
-To output the highlighted content:
-`node bin/highlighter.js --grammar=/path/to/file --theme=light|dark|/path/to/file --output=content --input=file --file=/path/to/file`
+### Highlight a file
+
+This will apply syntax highlighting to the whole file and output the result on the console.
+
+```
+node bin/highlighter.js highlight --grammar=/path/to/file --input=stdin|file [--file=/path/to/file] [--theme=light|dark|/path/to/file]
+```
+
+By default the light theme is used.
+If you use `--input=file` you need to specify the `--file` argument.
 
 ## Usage as a lib
 
@@ -37,21 +48,21 @@ You need to target nodejs, add `-lib highlighter` to your command.
 
 First create a highlighter:
 ```haxe
-var h = new highlighter.Highlighter("grammar/someGrammar.tmLanguage", "light");
+var h = new highlighter.Highlighter("grammar/someGrammar.tmLanguage");
 ```
 
 Then you can use it to highlight:
 ```haxe
-var s = h.run(DataContent("class C { }")); // Highlight a string
+var s = h.runContent("class C { }"); // Highlight a string
 
-var s = h.run(FileContent("test/some.file")); // Highlight a file
+var s = h.runFile("test/some.file"); // Highlight a file
 
-var s = h.run(StdinContent); // Highlight the content of stdin, if you pipe a file
+var s = h.runStdin(); // Highlight the content of stdin, if you pipe a file
 ```
 
 To get the css rules for the style you are using:
 ```haxe
-var s = h.run(Style);
+var s = h.runCss();
 ```
 
 ## License

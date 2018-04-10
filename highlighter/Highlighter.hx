@@ -236,15 +236,27 @@ class Highlighter
 	@param grammars The available grammars.
 	@param getLang A function used to go from css class list to grammar name.
 	**/
-	public static function patchFile (path:String, grammars:Map<String, Highlighter>, getLang:String->String)
+	public static function patchFile (path:String, grammars:Map<String, Highlighter>, getLang:String->String) : Array<String>
 	{
 		try
 		{
 			var xml = Xml.parse(File.getContent(path));
-			processNode(grammars, getLang, xml);
+			var missing = new Map<String, Bool>();
+
+			processNode(grammars, getLang, xml, missing);
 
 			var result = ~/&amp;([a-z]+;)/g.replace(xml.toString(), "&$1");
 			File.saveContent(path, result);
+
+			var a = [];
+			for (k in missing.keys())
+			{
+				if (k != "")
+				{
+					a.push(k);
+				}
+			}
+			return a;
 		}
 		catch (e:Dynamic)
 		{
@@ -272,8 +284,10 @@ class Highlighter
 	@param getLang A function used to go from css class list to grammar name.
 	@param recursive If the patching should enter the subdirectories.
 	**/
-	public static function patchFolder (path:String, grammars:Map<String, Highlighter>, getLang:String->String, recursive:Bool = true)
+	public static function patchFolder (path:String, grammars:Map<String, Highlighter>, getLang:String->String, recursive:Bool = true) : Array<String>
 	{
+		var missing = new Map<String, Bool>();
+
 		for (entry in FileSystem.readDirectory(path))
 		{
 			var entry_path = Path.join([path, entry]);
@@ -282,17 +296,37 @@ class Highlighter
 			{
 				if (recursive)
 				{
-					patchFolder(entry_path, grammars, getLang, true);
+					var folder_missing = patchFolder(entry_path, grammars, getLang, true);
+
+					for (k in folder_missing)
+					{
+						missing.set(k, true);
+					}
 				}
 			}
 			else if (Path.extension(entry_path) == "html")
 			{
-				patchFile(entry_path, grammars, getLang);
+				var file_missing = patchFile(entry_path, grammars, getLang);
+				
+				for (k in file_missing)
+				{
+					missing.set(k, true);
+				}
 			}
 		}
+
+		var a = [];
+		for (k in missing.keys())
+		{
+			if (k != "")
+			{
+				a.push(k);
+			}
+		}
+		return a;
 	}
 
-	static function processNode (grammars:Map<String, Highlighter>, getLang:String->String, xml:Xml)
+	static function processNode (grammars:Map<String, Highlighter>, getLang:String->String, xml:Xml, missingGrammars:Map<String, Bool>)
 	{
 		if (xml.nodeType == Xml.Element)
 		{
@@ -317,25 +351,29 @@ class Highlighter
 						xml.parent.insertChild(new_xml, siblings.indexOf(xml));
 						xml.parent.removeChild(xml);
 					}
+					else
+					{
+						missingGrammars.set(lang, true);
+					}
 
 				default:
-					processChildren(grammars, getLang, xml);
+					processChildren(grammars, getLang, xml, missingGrammars);
 			}
 		}
 
 		if (xml.nodeType == Xml.Document)
 		{
-			processChildren(grammars, getLang, xml);
+			processChildren(grammars, getLang, xml, missingGrammars);
 		}
 	}
 
-	static function processChildren (grammars:Map<String, Highlighter>, getLang:String->String, xml:Xml)
+	static function processChildren (grammars:Map<String, Highlighter>, getLang:String->String, xml:Xml, missingGrammars:Map<String, Bool>)
 	{
 		var children = [for (n in xml) n];
 
 		for (element in children)
 		{
-			processNode(grammars, getLang, element);
+			processNode(grammars, getLang, element, missingGrammars);
 		}
 	}
 }

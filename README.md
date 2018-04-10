@@ -65,6 +65,24 @@ To get the css rules for the style you are using:
 var s = h.runCss();
 ```
 
+Patching will parse a html file, or a folder of it, and apply syntax highlighting to the following blocks:
+```html
+<pre>
+	<code class="lang">
+	</code>
+</pre>
+```
+
+```haxe
+var grammars = ["haxe" => new Highlighter("grammars/haxe.tmLanguage)]; // Map language name => highlighter
+var getLang = function (classText) return classText.substr(12); // To filter class="prettyprint haxe" into "haxe"
+
+Highlighter.patchFile("some.file", grammars, getLang); // Patch a single file
+
+var recursive = true;
+Highlighter.patchDirectory("/some/path", grammars, getLang, recursive); // Patch a folder recursively (or not).
+```
+
 ## License
 
 [MIT](LICENSE.md)

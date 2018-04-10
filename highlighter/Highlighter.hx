@@ -4,11 +4,14 @@ import Sys.exit;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
-import haxe.io.Input;
 import haxe.io.Output;
+import haxe.io.Path;
+import haxe.xml.Parser.XmlParserException;
 import highlighter.VscodeTextmate;
 import sys.FileSystem;
 import sys.io.File;
+
+using StringTools;
 
 class Highlighter
 {
@@ -195,15 +198,6 @@ class Highlighter
 		return cout.getBytes().toString();
 	}
 
-	function run (input:Input) : String
-	{
-		var cout = new BytesOutput();
-
-		println(cout, Code.generateHighlighted(grammar, input));
-		input.close();
-		return cout.getBytes().toString();
-	}
-
 	/**
 	Run the highlighter on the stdin.
 	**/
@@ -233,5 +227,115 @@ class Highlighter
 	{
 		var input = File.read(path, false);
 		return Code.generateHighlighted(grammar, input);
+	}
+
+	/**
+	Patch the code blocks of a HTML file.
+
+	@param path The path of the file to patch.
+	@param grammars The available grammars.
+	@param getLang A function used to go from css class list to grammar name.
+	**/
+	public static function patchFile (path:String, grammars:Map<String, Highlighter>, getLang:String->String)
+	{
+		try
+		{
+			var xml = Xml.parse(File.getContent(path));
+			processNode(grammars, getLang, xml);
+
+			var result = ~/&amp;([a-z]+;)/g.replace(xml.toString(), "&$1");
+			File.saveContent(path, result);
+		}
+		catch (e:Dynamic)
+		{
+			if (Std.is(e, XmlParserException))
+			{
+				var e = cast(e, XmlParserException);
+				Sys.println('${e.message} at line ${e.lineNumber} char ${e.positionAtLine}');
+				Sys.println(e.xml.substr(e.position - 20, 40));
+			}
+			else
+			{
+				Sys.println(e);
+			}
+
+			Sys.println(haxe.CallStack.toString(haxe.CallStack.exceptionStack()));
+			throw('Error when parsing "$path"');
+		}
+	}
+
+	/**
+	Patch the code blocks of HTML files in a directory.
+
+	@param path The path of the directory to patch.
+	@param grammars The available grammars.
+	@param getLang A function used to go from css class list to grammar name.
+	@param recursive If the patching should enter the subdirectories.
+	**/
+	public static function patchFolder (path:String, grammars:Map<String, Highlighter>, getLang:String->String, recursive:Bool = true)
+	{
+		for (entry in FileSystem.readDirectory(path))
+		{
+			var entry_path = Path.join([path, entry]);
+
+			if (FileSystem.isDirectory(entry_path))
+			{
+				if (recursive)
+				{
+					patchFolder(entry_path, grammars, getLang, true);
+				}
+			}
+			else if (Path.extension(entry_path) == "html")
+			{
+				patchFile(entry_path, grammars, getLang);
+			}
+		}
+	}
+
+	static function processNode (grammars:Map<String, Highlighter>, getLang:String->String, xml:Xml)
+	{
+		if (xml.nodeType == Xml.Element)
+		{
+			switch (xml.nodeName)
+			{
+				case "pre":
+					var code = xml.firstChild();
+
+					if (code.nodeType != Xml.Element)
+					{
+						return;
+					}
+
+					var lang = code.exists("class") ? getLang(code.get("class")) : "";
+
+					if (grammars.exists(lang))
+					{
+						var original = code.firstChild().toString().htmlUnescape();
+						var highlighted = grammars.get(lang).runContent(original);
+						var new_xml = Xml.parse(highlighted);
+						var siblings = [for (n in xml.parent) n];
+						xml.parent.insertChild(new_xml, siblings.indexOf(xml));
+						xml.parent.removeChild(xml);
+					}
+
+				default:
+					processChildren(grammars, getLang, xml);
+			}
+		}
+
+		if (xml.nodeType == Xml.Document)
+		{
+			processChildren(grammars, getLang, xml);
+		}
+	}
+
+	static function processChildren (grammars:Map<String, Highlighter>, getLang:String->String, xml:Xml)
+	{
+		var children = [for (n in xml) n];
+
+		for (element in children)
+		{
+			processNode(grammars, getLang, element);
+		}
 	}
 }

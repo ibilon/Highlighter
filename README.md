@@ -74,7 +74,7 @@ Patching will parse a html file, or a folder of it, and apply syntax highlightin
 ```
 
 ```haxe
-var grammars = ["haxe" => new Highlighter("grammars/haxe.tmLanguage)]; // Map language name => highlighter
+var grammars = ["haxe" => new Highlighter("grammars/haxe.tmLanguage")]; // Map language name => highlighter
 var getLang = function (classText) return classText.substr(12); // To filter class="prettyprint haxe" into "haxe"
 
 var missingGrammars = Highlighter.patchFile("some.file", grammars, getLang); // Patch a single file

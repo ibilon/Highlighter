@@ -1,7 +1,7 @@
 {
     "name": "highlighter",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "devDependencies": {
-        "vscode-textmate": "^3.1.5"
+        "vscode-textmate": "3.1.5"
     }
 }

@@ -1,7 +1,12 @@
 package highlighter;
 
 import highlighter.VscodeTextmate;
+
+#if haxe4
+import js.lib.Uint32Array;
+#else
 import js.html.Uint32Array;
+#end
 
 typedef TokenData = {
 	startIndex : Int,

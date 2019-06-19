@@ -1,4 +1,4 @@
 -main highlighter.Highlighter
--lib compiletime
+-lib compiletime:2.8.0
 -lib hxnodejs
 -js bin/highlighter.js

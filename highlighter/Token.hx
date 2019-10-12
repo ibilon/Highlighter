@@ -13,7 +13,7 @@ typedef TokenData = {
 	endIndex : Int,
 	languageID : LanguageId,
 	tokenType : StandardTokenType,
-	fontStyle : Int,
+	fontStyle : FontStyle,
 	forground : Int,
 	background : Int,
 }

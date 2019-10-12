@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["syntax", "highlighting", "tmLanguage"],
 	"description": "Tool used to highlight text according to a textmate tmLanguage file",
-	"version": "0.6.0",
-	"releasenote": "Update dependencies",
+	"version": "0.6.1",
+	"releasenote": "fix for rc.5",
 	"contributors": ["_ibilon"],
 	"dependencies": {
 		"hxnodejs": "",

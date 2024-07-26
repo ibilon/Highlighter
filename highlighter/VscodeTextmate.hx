@@ -68,7 +68,7 @@ typedef IToken = {
 	var Other = 0;
 	var Comment = 1;
 	var String = 2;
-	var RegEx = 4;
+	var RegEx = 3;
 }
 
 typedef ITokenizeLineResult2 = {
@@ -76,18 +76,20 @@ typedef ITokenizeLineResult2 = {
 	var ruleStack(default, null):StackElement;
 }
 
-class MetadataConsts {
+class EncodedTokenDataConsts {
 	public static inline var LANGUAGEID_MASK : UInt = 255;
-	public static inline var TOKEN_TYPE_MASK : UInt = 1792;
-	public static inline var FONT_STYLE_MASK : UInt = 14336;
-	public static inline var FOREGROUND_MASK : UInt = 8372224;
-	public static inline var BACKGROUND_MASK : UInt = cast 4286578688;
+	public static inline var TOKEN_TYPE_MASK : UInt = 768;
+	public static inline var BALANCED_BRACKETS_MASK : UInt = 1024;
+	public static inline var FONT_STYLE_MASK : UInt = 30720;
+	public static inline var FOREGROUND_MASK : UInt = 16744448;
+	public static inline var BACKGROUND_MASK : UInt = cast 4278190080;
 
 	public static inline var LANGUAGEID_OFFSET = 0;
 	public static inline var TOKEN_TYPE_OFFSET = 8;
+	public static inline var BALANCED_BRACKETS_OFFSET = 10;
 	public static inline var FONT_STYLE_OFFSET = 11;
-	public static inline var FOREGROUND_OFFSET = 14;
-	public static inline var BACKGROUND_OFFSET = 23;
+	public static inline var FOREGROUND_OFFSET = 15;
+	public static inline var BACKGROUND_OFFSET = 24;
 }
 
 @:enum abstract LanguageId(Int) {

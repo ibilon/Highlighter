@@ -1,6 +1,6 @@
 {
     "name": "highlighter",
-    "version": "0.6.1",
+    "version": "0.7.0",
     "devDependencies": {
         "vscode-oniguruma": "^2.0.1",
         "vscode-textmate": "9.1.0"

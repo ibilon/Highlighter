@@ -1,3 +1,3 @@
 # Themes
 
-Taken from <https://github.com/Microsoft/vscode/tree/3fbfccad359e278a4fbde106328b2b8e2e2242a7/extensions/theme-defaults/themes> under MIT License.
+Taken from <https://github.com/microsoft/vscode/tree/146b3fb6e02244f991647ecfc34df54b560d7b9c/extensions/theme-defaults/themes> under MIT License.

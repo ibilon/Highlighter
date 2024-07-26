@@ -1,18 +1,37 @@
 package highlighter;
 
+import highlighter.VscodeOniguruma;
 #if haxe4
 import js.lib.Uint32Array;
 #else
 import js.html.Uint32Array;
 #end
+import js.lib.Promise;
+
+typedef RegistryOptions = {
+	onigLib: Promise<IOnigLib>,
+	?theme: IRawTheme
+};
+
+typedef IOnigLib = {
+	createOnigScanner:(sources:Array<String>) -> OnigScanner,
+	createOnigString:(str:String) -> OnigString
+};
 
 @:jsRequire("vscode-textmate", "Registry")
 extern class Registry {
-    function new();
+	function new(?options:RegistryOptions);
 	function setTheme(theme:IRawTheme):Void;
-    function loadGrammarFromPathSync(path:String):IGrammar;
+	function addGrammar(rawGrammar:IRawGrammar):Promise<IGrammar>;
 	function getColorMap():Array<String>;
 }
+
+@:jsRequire("vscode-textmate")
+extern class VscodeTextmate {
+	public static function parseRawGrammar(content:String, ?filePath:String):IRawGrammar;
+}
+
+typedef IRawGrammar = {};
 
 typedef IRawTheme = {
 	?name:String,

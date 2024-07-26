@@ -15,29 +15,29 @@ typedef ThemeData = {
 
 class Theme
 {
-	public static function load (path:String) : ThemeData
+	public static function load (path:String) : IRawTheme
 	{
-		var data : ThemeData = Json.parse(getThemeContent(path.normalize()));
+		var currentPath : Null<String> = path;
+		final themeData = [];
 
-		if (data.tokenColors == null)
-		{
-			data.tokenColors = [];
+		while (currentPath != null) {
+			final data : ThemeData = Json.parse(getThemeContent(currentPath.normalize()));
+			themeData.push(data);
+
+			currentPath = switch data.include {
+				case null: null;
+				case filename:
+					final directory = currentPath.directory();
+					currentPath = if (directory == "") './$filename' else '$directory/$filename';
+			};
 		}
 
-		if (data.include != null)
-		{
-			var dir = path.directory();
-
-			if (dir == "")
-			{
-				dir = ".";
-			}
-
-			var sub = load(dir + "/" + data.include);
-			data.tokenColors = sub.tokenColors.concat(data.tokenColors);
-		}
-
-		return data;
+		return {
+			name: themeData[0].name,
+			settings: Lambda.flatMap(themeData, function(item) {
+				return item.tokenColors != null ? item.tokenColors : [];
+			})
+		};
 	}
 
 	static function getThemeContent (path:String) : String
@@ -69,6 +69,6 @@ class Theme
 
 			default:
 				throw 'File "${path}" doesn\'t exist';
-		}
+		};
 	}
 }

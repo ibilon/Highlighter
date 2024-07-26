@@ -1,15 +1,13 @@
 package highlighter;
 
-import highlighter.VscodeTextmate;
-
 class CSS
 {
-	public static function generateStyle (registry:Registry) : String
+	public static function generateStyle (colorMap:Array<String>) : String
 	{
 		var style = [];
 
 		style.push('.highlighted { font-family: "Droid Sans Mono", "monospace", monospace, "Droid Sans Fallback"; font-size: 14px; }');
-		style.push(generateTokensCSSForColorMap(registry.getColorMap()));
+		style.push(generateTokensCSSForColorMap(colorMap));
 
 		return style.join("\n");
 	}

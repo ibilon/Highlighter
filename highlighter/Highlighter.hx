@@ -1,9 +1,9 @@
 package highlighter;
 
+import js.lib.Promise;
 import Sys.exit;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
-import haxe.io.BytesOutput;
 import haxe.io.Output;
 import haxe.io.Path;
 import haxe.xml.Parser.XmlParserException;
@@ -15,6 +15,8 @@ using StringTools;
 
 class Highlighter
 {
+	private static inline var DEFAULT_THEME = "light";
+
 	static function println (output:Output, message:String)
 	{
 		output.writeString(message);
@@ -56,7 +58,7 @@ class Highlighter
 		}
 
 		var grammar = "";
-		var theme = "light";
+		var theme = DEFAULT_THEME;
 		var input = "";
 		var file = "";
 
@@ -149,43 +151,89 @@ class Highlighter
 		}
 
 		// Run it
-		var h = new Highlighter(grammar, theme);
-
-		if (command == "css")
-		{
-			cout.writeString(h.runCss());
-		}
-		else if (input == "stdin")
-		{
-			cout.writeString(h.runStdin());
-		}
-		else
-		{
-			cout.writeString(h.runFile(file));
-		}
+		loadHighlighter(grammar, theme, (highlighter) -> {
+			cout.writeString(
+				if (command == "css") {
+					highlighter.runCss();
+				} else if (input == "stdin") {
+					highlighter.runStdin();
+				} else {
+					highlighter.runFile(file);
+				}
+			);
+		});
 	}
 
-	var registry : Registry;
-	var grammar : IGrammar;
-	var theme : Theme.ThemeData;
+	private static function loadOnigLib () {
+		return VscodeOniguruma.loadWASM(js.node.Fs.readFileSync('./node_modules/vscode-oniguruma/release/onig.wasm')).then((Void) -> {
+			return {
+				createOnigScanner: function(patterns)
+				{
+					return new VscodeOniguruma.OnigScanner(patterns);
+				},
+				createOnigString: function(s)
+				{
+					return new VscodeOniguruma.OnigString(s);
+				}
+			};
+		});
+	}
 
-	/**
-	Create a highlighter.
+	public static function loadHighlighter (filePath:String, themeName:String = DEFAULT_THEME, callback:Highlighter->Void) {
+		final theme = Theme.load(themeName);
+		final vscodeOnigurumaLib = loadOnigLib();
+		final registry = new Registry({theme: theme, onigLib: vscodeOnigurumaLib});
+		registry.addGrammar(VscodeTextmate.parseRawGrammar(sys.io.File.getContent(filePath), filePath)).then(
+			function(grammar) {
+				callback(new Highlighter(registry, grammar));
+			}
+		);
+	}
 
-	@param grammar The path to the grammar file.
-	@param theme The path to the theme.
-	**/
-	public function new (grammar:String, theme:String = "light")
-	{
-		this.registry = new Registry();
+	public static function loadHighlighters (grammarFiles:Map<String, String>, themeName:String = DEFAULT_THEME, callback:Map<String, Highlighter>->Void) {
+		final theme = Theme.load(themeName);
+		final promises = [];
+		final vscodeOnigurumaLib = loadOnigLib();
 
-		if (grammar != "")
-		{
-			this.grammar = registry.loadGrammarFromPathSync(grammar);
+		for (path in grammarFiles) {
+			final registry = new Registry({theme: theme, onigLib: vscodeOnigurumaLib });
+			final rawGrammar = VscodeTextmate.parseRawGrammar(sys.io.File.getContent(path), path);
+			promises.push(registry.addGrammar(rawGrammar)
+				.then(g -> {path: path, registry: registry, grammar: g}));
 		}
 
-		this.theme = Theme.load(theme);
-		this.registry.setTheme({ name: this.theme.name, settings: this.theme.tokenColors });
+		Promise.allSettled(promises).then(
+			function(grammars) {
+				final highlighersByPath = new Map<String, Highlighter>();
+				for (grammar in grammars) {
+					if (grammar.status == Fulfilled) {
+						highlighersByPath[grammar.value.path] = new Highlighter(grammar.value.registry, grammar.value.grammar);
+					}
+				}
+				final highlightersByName = new Map<String, Highlighter>();
+
+				for (name => path in grammarFiles) {
+					highlightersByName[name] = highlighersByPath[path];
+				}
+
+				callback(highlightersByName);
+			}
+		);
+	}
+
+	final grammar : IGrammar;
+	final registry : Registry;
+
+	/**
+		Create a highlighter.
+
+		@param registry The registry object where the grammar has been loaded.
+		@param grammar The grammar object.
+	**/
+	private function new (registry:Registry, grammar:IGrammar)
+	{
+		this.registry = registry;
+		this.grammar = grammar;
 	}
 
 	/**
@@ -193,9 +241,7 @@ class Highlighter
 	**/
 	public function runCss () : String
 	{
-		var cout = new BytesOutput();
-		println(cout, CSS.generateStyle(registry));
-		return cout.getBytes().toString();
+		return CSS.generateStyle(registry.getColorMap());
 	}
 
 	/**
@@ -307,7 +353,7 @@ class Highlighter
 			else if (Path.extension(entry_path) == "html")
 			{
 				var file_missing = patchFile(entry_path, grammars, getLang);
-				
+
 				for (k in file_missing)
 				{
 					missing.set(k, true);

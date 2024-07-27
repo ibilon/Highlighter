@@ -22,7 +22,7 @@ class Theme
 
 		while (currentPath != null) {
 			final data : ThemeData = Json.parse(getThemeContent(currentPath.normalize()));
-			themeData.push(data);
+			themeData.unshift(data);
 
 			currentPath = switch data.include {
 				case null: null;

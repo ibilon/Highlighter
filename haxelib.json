@@ -5,7 +5,7 @@
 	"tags": ["syntax", "highlighting", "tmLanguage"],
 	"description": "Tool used to highlight text according to a textmate tmLanguage file",
 	"version": "0.7.0",
-	"releasenote": "fix for rc.5",
+	"releasenote": "Upgrade to new version of the vscode parsing/highlighting libraries",
 	"contributors": ["_ibilon"],
 	"dependencies": {
 		"hxnodejs": "",

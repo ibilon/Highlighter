@@ -49,8 +49,8 @@ class Theme
 
 		return switch (path)
 		{
-			case "light_defaults.json":
-				CompileTime.readFile("highlighter/themes/light_defaults.json");
+			case "light_modern.json":
+				CompileTime.readFile("highlighter/themes/light_modern.json");
 
 			case "light", "light_plus.json":
 				CompileTime.readFile("highlighter/themes/light_plus.json");
@@ -58,8 +58,8 @@ class Theme
 			case "light_vs.json":
 				CompileTime.readFile("highlighter/themes/light_vs.json");
 
-			case "dark_defaults.json":
-				CompileTime.readFile("highlighter/themes/dark_defaults.json");
+			case "dark_modern.json":
+				CompileTime.readFile("highlighter/themes/dark_modern.json");
 
 			case "dark", "dark_plus.json":
 				CompileTime.readFile("highlighter/themes/dark_plus.json");

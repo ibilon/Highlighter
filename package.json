@@ -1,7 +1,8 @@
 {
     "name": "highlighter",
-    "version": "0.6.1",
+    "version": "0.7.0",
     "devDependencies": {
-        "vscode-textmate": "4.1.1"
+        "vscode-oniguruma": "^2.0.1",
+        "vscode-textmate": "9.1.0"
     }
 }

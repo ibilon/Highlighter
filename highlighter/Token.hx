@@ -47,11 +47,11 @@ class Token
 		return {
 			startIndex: start,
 			endIndex: 0,
-			languageID: cast (meta & MetadataConsts.LANGUAGEID_MASK) >> MetadataConsts.LANGUAGEID_OFFSET,
-			tokenType: cast (meta & MetadataConsts.TOKEN_TYPE_MASK) >> MetadataConsts.TOKEN_TYPE_OFFSET,
-			fontStyle: cast (meta & MetadataConsts.FONT_STYLE_MASK) >> MetadataConsts.FONT_STYLE_OFFSET,
-			forground: (meta & MetadataConsts.FOREGROUND_MASK) >> MetadataConsts.FOREGROUND_OFFSET,
-			background: (meta & MetadataConsts.BACKGROUND_MASK) >> MetadataConsts.BACKGROUND_OFFSET,
+			languageID: cast (meta & EncodedTokenDataConsts.LANGUAGEID_MASK) >> EncodedTokenDataConsts.LANGUAGEID_OFFSET,
+			tokenType: cast (meta & EncodedTokenDataConsts.TOKEN_TYPE_MASK) >> EncodedTokenDataConsts.TOKEN_TYPE_OFFSET,
+			fontStyle: cast (meta & EncodedTokenDataConsts.FONT_STYLE_MASK) >> EncodedTokenDataConsts.FONT_STYLE_OFFSET,
+			forground: (meta & EncodedTokenDataConsts.FOREGROUND_MASK) >> EncodedTokenDataConsts.FOREGROUND_OFFSET,
+			background: (meta & EncodedTokenDataConsts.BACKGROUND_MASK) >> EncodedTokenDataConsts.BACKGROUND_OFFSET,
 		}
 	}
 }

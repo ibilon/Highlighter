@@ -46,41 +46,43 @@ If you use `--input=file` you need to specify the `--file` argument.
 
 You need to target nodejs, add `-lib highlighter` to your command.
 
-First create a highlighter:
+To create and use a highlighter:
+
 ```haxe
-var h = new highlighter.Highlighter("grammar/someGrammar.tmLanguage");
-```
+highlighter.Highlighter.loadHighlighter("grammar/someGrammar.tmLanguage", function(h) {
+    var s = h.runContent("class C { }"); // Highlight a string
 
-Then you can use it to highlight:
-```haxe
-var s = h.runContent("class C { }"); // Highlight a string
+    var s = h.runFile("test/some.file"); // Highlight a file
 
-var s = h.runFile("test/some.file"); // Highlight a file
-
-var s = h.runStdin(); // Highlight the content of stdin, if you pipe a file
+    var s = h.runStdin(); // Highlight the content of stdin, if you pipe a file
+});
 ```
 
 To get the css rules for the style you are using:
+
 ```haxe
-var s = h.runCss();
+highlighter.Highlighter.loadHighlighter("grammar/someGrammar.tmLanguage", function(h) {
+    var s = h.runCss();
+});
 ```
 
 Patching will parse a html file, or a folder of it, and apply syntax highlighting to the following blocks:
+
 ```html
 <pre>
-	<code class="lang">
-	</code>
+    <code class="lang">
+    </code>
 </pre>
 ```
 
 ```haxe
-var grammars = ["haxe" => new Highlighter("grammars/haxe.tmLanguage")]; // Map language name => highlighter
 var getLang = function (classText) return classText.substr(12); // To filter class="prettyprint haxe" into "haxe"
+highlighter.Highlighter.loadHighlighters(["haxe" => "grammars/haxe.tmLanguage"], function(grammars) {
+    var missingGrammars = Highlighter.patchFile("some.file", grammars, getLang); // Patch a single file
 
-var missingGrammars = Highlighter.patchFile("some.file", grammars, getLang); // Patch a single file
-
-var recursive = true;
-var missingGrammars = Highlighter.patchDirectory("/some/path", grammars, getLang, recursive); // Patch a folder recursively (or not).
+    var recursive = true;
+    var missingGrammars = Highlighter.patchDirectory("/some/path", grammars, getLang, recursive); // Patch a folder recursively (or not).
+})
 ```
 
 ## License
